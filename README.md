@@ -68,6 +68,23 @@ Var Y=\dfrac{1}{n-1}tr(\boldsymbol{Y}^T\boldsymbol{Y})=\dfrac{1}{n-1}tr (\boldsy
 
 这就说明 $\lambda_i$ 是 $\boldsymbol{\Sigma }$ 的特征值， $\boldsymbol{w}_i$ 是关于 $\lambda_i$ 的特征向量。此时为了让这里的方差最大，我们选取前 $l$ 个特征值及特征向量，这就是我们所想要的 $\boldsymbol{W}$ .
 
+
+## 最小投影距离角度建模
+针对 PCA 问题的数据集 $\{\boldsymbol{x}_1,\cdots,\boldsymbol{x}_n\}$, 其中 $\boldsymbol{x}_i\in\mathbb{R}^d$ , 我们希望将其降到某个 $k$ 维空间中，我们选取某个 $k$ 维空间的一组基向量 $\boldsymbol{U}=\{\boldsymbol{u}_1,\cdots,\boldsymbol{u}_k\}$, 其中 $\boldsymbol{u}_i\in\mathbb{R}^d$ ，这里我们将 $\boldsymbol{x}_i$ 投影到 $\boldsymbol{U}$ 上，得到 $\boldsymbol{v}_i=\boldsymbol{U}^T\boldsymbol{x}_i$ , 我们希望 $\boldsymbol{v}_i$ 和 $\boldsymbol{x}_i$ 之间的距离尽可能小，也就是
+```math
+\min\limits_{\boldsymbol{U}}\|\boldsymbol{X}-\boldsymbol{U}^T\boldsymbol{V}\|^2_F\quad s.t.\ \boldsymbol{U}^T\boldsymbol{U}=\boldsymbol{I}
+```
+其中 $\boldsymbol{U}^T\boldsymbol{V}$ 就是从 $\boldsymbol{U}$ 上投影回来的数据，我们希望这个数据和原始数据 $\boldsymbol{X}$ 之间的距离尽可能小，这样就保证了我们降维之后的数据能够尽可能保留原始数据的特征。
+利用上面的数量关系我们可以知道 $\boldsymbol{V}=\boldsymbol{X}^T\boldsymbol{U}$ , 代入上面的式子，我们就得到了
+```math
+\min\limits_{\boldsymbol{U}}\|\boldsymbol{X}-\boldsymbol{U}^T\boldsymbol{U}^T\boldsymbol{X}\|^2_F\quad s.t.\ \boldsymbol{U}^T\boldsymbol{U}=\boldsymbol{I}
+```
+做进一步化简，并作一步代换，我们最终得到：
+```math
+\max\limits_{\boldsymbol{U}}tr(\boldsymbol{U}^T\boldsymbol{X}^T\boldsymbol{X}\boldsymbol{U})\quad s.t.\ \boldsymbol{U}^T\boldsymbol{U}=\boldsymbol{I}
+```
+这就回到了我们之前的特征值分解求解 PCA 的问题了。
+
 ## 关于奇异值分解 (SVD)
 奇异值分解我们事实上在高代中已经学过了，但显然我们基本全部忘记了，我们来复习一下，他做了这样一件事儿：对矩阵 $\boldsymbol{A}\in\mathbb{R}^{m\times n}, m>n$ ,我们可以得到
 
@@ -355,15 +372,10 @@ K=\begin{bmatrix}
 此外，还可通过函数组合得到，例如：
 
 *   若 $\kappa_1$ 和 $\kappa_2$ 为核函数，则对于任意正数 $\gamma_1$、$\gamma_2$，其线性组合
-
-    
-
 ```math
 \gamma_1 \kappa_1 + \gamma_2 \kappa_2
 ```
-
-
-    也是核函数；
+也是核函数；
 
 *   若 $\kappa_1$ 和 $\kappa_2$ 为核函数，则核函数的直积
 
@@ -372,9 +384,7 @@ K=\begin{bmatrix}
 ```math
 \kappa_1 \otimes \kappa_2(\boldsymbol{x}, \boldsymbol{z}) = \kappa_1(\boldsymbol{x}, \boldsymbol{z})\kappa_2(\boldsymbol{x}, \boldsymbol{z})
 ```
-
-
-    也是核函数；
+也是核函数；
 
 *   若 $\kappa_1$ 为核函数，则对于任意函数 $g(\boldsymbol{x})$，
 
@@ -383,9 +393,7 @@ K=\begin{bmatrix}
 ```math
 \kappa(\boldsymbol{x}, \boldsymbol{z}) = g(\boldsymbol{x})\kappa_1(\boldsymbol{x}, \boldsymbol{z})g(\boldsymbol{z})
 ```
-
-
-    也是核函数。
+也是核函数。
 
 ## 软间隔与正则化
 在现实任务中，我们往往很难确定合适的核函数使得训练样本在特征空间中线性可分，而且训练出的模型可能是过拟合的，在这样的条件下，我们可以允许一部分样本出错，也就引入了软间隔的概念。
@@ -445,103 +453,6 @@ hinge \text{损失}: \ell_{hinge}(z)=\max(0,1-z)
     &0\leqslant \alpha_i\leqslant C,\ i=1,2,\cdots,m
 \end{array}
 ```
-
-
-## 支持向量回归
-支持向量的思想可以用来解决回归问题。针对训练样本 $D=\{(\boldsymbol{x}_1,y_1),(\boldsymbol{x}_2,y_2),\cdots,(\boldsymbol{x}_m,y_m)\},\ y_i\in \mathbb{R}$ ，支持向量回归 (Support Vector Regression, SVM) 假设我们能容忍 $f(\boldsymbol{x})$ 与 $y$ 之间有 $\varepsilon$ 的误差，也就是构建了一个宽度为 $2\varepsilon$ 尖阁待，则此时问题转化为
-
-
-```math
-\min\limits_{\boldsymbol{w},b}\dfrac12\|\boldsymbol{w}\|^2+C\sum\limits_{i=1}^m\ell_{\varepsilon}(f(\boldsymbol{x}_i)-y_i)
-```
-
-
-其中
-
-
-```math
-\ell_{\varepsilon}(z)=\left\{\begin{array}{ll}
-    0, & if\ |z|\leqslant \varepsilon\\
-    |z|-\varepsilon ,& otherwise
-\end{array}\right.
-```
-
-
-同样的，我们引入松弛变量
-
-
-```math
-\begin{array}{ll}
-    \min\limits_{\boldsymbol{w},b,\xi_i,\hat{\xi}_i} & \dfrac12\|\boldsymbol{w}\|^2+C\sum\limits_{i=1}^m(\xi_i+\hat{\xi}_i)\\[8pt]
-    s.t.& f(\boldsymbol{x}_i)-y_i\leqslant \varepsilon+\xi_i\\[8pt]
-    & y_i-f(\boldsymbol{x}_i)\leqslant \varepsilon+\hat{\xi}_i\\[8pt]
-    &\xi_i,\hat{\xi}_i\geqslant 0,i=1,2,\cdots,m
-\end{array}
-```
-
-
-利用拉格朗日乘子法，我们得到对偶问题：
-
-
-```math
-\begin{array}{ll}
-    \max\limits_{\boldsymbol{\alpha},\hat{\boldsymbol{\alpha}}} &\sum\limits_{i=1}^m y_i(\hat{\alpha}_i-\alpha_i)-\varepsilon(\hat{\alpha}_i+\alpha_i)-\dfrac12\sum\limits_{i=1}^m\sum\limits_{j=1}^m(\hat{\alpha}_i-\alpha_i)(\hat{\alpha}_j-\alpha_j)\boldsymbol{x}_i^T\boldsymbol{x}_j\\[8pt]
-    s.t.& \sum\limits_{i=1}^m(\hat{\alpha}_i-\alpha_i)=0\\
-    & 0\leqslant \alpha_i,\hat{\alpha}_i\leqslant C
-\end{array}
-```
-
-
-另外 $\boldsymbol{w}$ 满足 $\boldsymbol{w}=\sum\limits_{i=1}^m(\hat{\alpha}_i-\alpha_i)\boldsymbol{x}_i$ , 且该过程满足 KKT 条件时：
-
-
-```math
-\left\{\begin{array}{l}
-    \alpha_i(f(\boldsymbol{x}_i)-y_i-\varepsilon-\xi_i)=0\\[8pt]
-    \hat{\alpha}_i(y_i-f(\boldsymbol{x}_i)-\varepsilon-\hat{\xi}_i)=0\\[8pt]
-    \alpha_i\hat{\alpha}_i=0,\ \xi_i\hat{\xi}_i=0\\[8pt]
-    (C-\alpha_i)\xi_i=0,\ (C-\hat{\alpha}_i)\hat{\xi}_i=0
-\end{array}\right.
-```
-
-
-我们将 $\boldsymbol{w}$ 带入超平面方程，有
-
-
-```math
-f(\boldsymbol{x})=\sum\limits_{i=1}^m(\hat{\alpha}_i=\alpha_i)\boldsymbol{x}_i^T\boldsymbol{x}+b
-```
-
-
-另外，结合 $(C-\alpha_i)\xi_i=0$ 且 $\alpha_i(f(\boldsymbol{x}_i)-y_i-\varepsilon-\xi_i)=0$ ，于是若 $0<\alpha_i<C$ ,就一定有 $\xi_i=0$ ，因此
-
-
-```math
-b=y_i+\varepsilon-\sum\limits_{i=1}^m(\hat{\alpha}_i-\alpha_i)\boldsymbol{x}_i^T\boldsymbol{x}
-```
-
-
-当然像上面取平均值的方法也是可行的。
-
-## 核方法
-本节我们首先介绍表示定理：
->令 $\mathbb{H}$ 为核函数 $\kappa$ 对应的再生核希尔伯特空间, $\|h\|_{\mathbb{H}}$ 表示 $\mathbb{H}$ 空间中关于 $h$ 的范数，对于任意单调递增函数 $\Omega:[0,\infty]\mapsto\mathbb{R}$ 和任意非负损失函数 $\ell:\mathbb{R}^m\mapsto[0,\infty]$ ，优化问题
-
-
-```math
-\min\limits_{h\in\mathbb{H}}F(h)=\Omega(\|h\|_{\mathbb{H}})+\ell(h(\boldsymbol{x}_1),h(\boldsymbol{x}_2),\cdots,h(\boldsymbol{x}_m))
-```
-
-
-的解总可写作：
-
-
-```math
-h^*(\boldsymbol{x})=\sum\limits_{i=1}^m\alpha_i\kappa(\boldsymbol{x},\boldsymbol{x}_i)
-```
-
-
-一切基于核函数的学习方法我们都称为核方法，比较常见的就是通过引入核函数 (核化) 来讲线性学习器拓展为非线性学习器，我们将这种方法称为 **核线性判别分析** (Kernelized Linear Discriminant Analysis, KLDA) .
 
 # K-均值 (K-means)
 K-均值往往被用来解决聚类问题。所谓聚类问题，就是在某个空间中存在一些点，这些点我们可以依据它们之间的距离分成几类，使得每个类别之间的距离较大，而类别中的数据点的距离较小，实现分类的效用。
@@ -629,7 +540,7 @@ S=\dfrac{b-a}{\max(a,b)}
 ## VAE 的结构与思想
 变分自编码器本质上就是深度神经网络的一种，它可以提取输入的特征，生成一个隐变量，并基于这个隐变量对原始输入进行重构，整体的结构是由编码器 (encoder) 和一个解码器 (decoder) 组成的。
 ![fig](figs/VAE.png)
-用简单的例子来理解，我们输入一个人像，它可以通过编码器得到这个人的性别、情绪、肤色、发型等特征，然后我们将这样的特征再次输入解码器，它又可以将这样的人像重构出来，这就是 VAE 的意义所在，它不光可以提取特征，还可以根据重构结果验证特征提取的效果。当然这里我们要指出，这些特征并不是得到了一个布尔变量的取值，我们更愿意选取一个取值范围来判定这些特征的程度，比如大胡子和小胡子都有胡子，但是浓密程度是不一样的，而最好的方式就是使用概率分布，将取值范围限制在 $[0,1]$ 之间。
+用简单的例子来理解，我们输入一个人像，它可以通过编码器得到这个人的性别、情绪、肤色、发型等特征，然后我们将这样的特征再次输入解码器，它又可以将这样的人像重构出来，这就是 VAE 的意义所在，它不光可以提取特征，还可以根据重构结果验证特征提取的效果。当然这里我们要指出，这些特征并不是得到了一个布尔变量的取值，我们更愿意选取一个取值范围来判定这些特征的程度，比如大胡子和小胡子都有胡子，但是浓密程度是不一样的，而最好的方式就是使用概率分布，将取值范围限制在 $[0,1]$ 之间。最终，我们得到了隐变量的分布情况，并依据此分布输入解码器，对这类似的人像进行重构。
 
 ## KL 散度
 对于某个事件，其可能存在一个概率密度函数 $p(x)$ ，但是我们是不知道的，因此我们通过调整另外一个概率密度函数 $q(x)$ 使得 $p(x)$ 和 $q(x)$ 尽可能相近，当达到一定水平了之后，我们就可以用 $q(x)$ 来替代 $p(x)$ ，那么问题就是如何保证他们两个十分相近呢，这里我们就可以采用 KL 散度：
@@ -643,7 +554,7 @@ S=\dfrac{b-a}{\max(a,b)}
 假设 $p(x)=q(x)$ 那么显然 $\mathcal{D}_{KL}(p\| q)=0$ ，另外可以通过一些其他的方法推断出 $p(x)$ 和 $q(x)$ 越相近，他们的 KL 散度越小。值得指出的是， $\mathcal{D}_{KL}(p\| q)\geqslant 0$ 是恒成立的。
 
 ## VAE 编码器的数学推导
-现在我们假设 VAE 的输入是 $x$ ，中间的隐变量为 $z$ ，正如上面我们举得人像和特征的例子， $x$ 和 $z$ 之间的关系是唯一固定的，我们使用概率表示 $x$ 和 $z$ 的关系，即 $p(z|x)$ ，那么这里的 $p$ 就是一个固定但未知的概率。同样的，对于已知的输入 $x$ 它的概率 $p(x)$ (模型选取到这个图片的概率)也是已知的。因此就和上面的想法一样，我们希望用一个我们构造的 $q(z|x)$ 来逼近 $p(z|x)$ 进而用 $q(z|x)$ 替代 $p(z|x)$ ，这里的 $q(z|x)$ 就是我们上面 encoder 中学习到的映射。当然，这里我们可以知道
+现在我们假设 VAE 的输入是 $x$ ，中间的隐变量为 $z$ ，正如上面我们举得人像和特征的例子， $x$ 和 $z$ 之间的关系是唯一固定的，我们使用概率表示 $x$ 和 $z$ 的关系，即 $p(z|x)$ ，那么这里的 $p$ 就是一个固定但未知的概率。同样的，对于已知的输入 $x$ 它的概率 $p(x)$ (模型选取到这个图片的概率)也是已知的。因此就和上面的想法一样，我们希望用一个我们构造的 $q(z|x)$ 来逼近 $p(z|x)$ 进而用 $q(z|x)$ 替代 $p(z|x)$ ，这里的 $q(z|x)$ 就是我们上面 encoder 中学习到的映射，并且从统计学中心极限定理的视角出发，这里的 $q(z)\sin \mathcal{N}(\mu,\sigma^2)$ ，这里我们只要找到了 $\mu$ 和 $\sigma^2$ , 我们就可以依据这样的参数进行重构了。当然，这里我们可以知道
 
 
 ```math
