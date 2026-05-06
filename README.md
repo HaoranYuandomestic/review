@@ -158,12 +158,14 @@ Var Y=\dfrac{1}{n-1}tr(\boldsymbol{Y}^T\boldsymbol{Y})=\dfrac{1}{n-1}tr (\boldsy
 ```
 
 
-* 我们可以设定一个小于 $1$ 的数 $\varepsilon$ ，如果 $\lambda_i\geqslant \lambda_1$ 则接受他，否则拒绝他。
+* 我们可以设定一个小于 $1$ 的数 $\varepsilon$ ，如果 $\lambda_i\geqslant \varepsilon\lambda_1$ 则接受他，否则拒绝他。
 
 # 支持向量机 (SVM)
 ## 间隔与支持向量
 对于分类问题，其训练样本为 $D=\{(\boldsymbol{x}_1,y_1),(\boldsymbol{x}_2,y_2),\cdots(\boldsymbol{x}_n,y_n)\},\ y_i\in\{-1,1\}$ , 将其放在坐标系中，我们希望能够找到某个超平面，能够将这些正例和反例分隔开。
+
 ![pic](figs/division.png)
+
 在样本空间中，划分超平面用下面的线性方程来描述：
 
 
